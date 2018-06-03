@@ -49,8 +49,9 @@ func checkStatus() int {
 	return 16
 }
 
-func postWish(hard *int, address string, code string, lovePower int64) (bool, map[string]interface{}) {
+func postWish(hard *int, cheerWord string, address string, code string, lovePower int64) (bool, map[string]interface{}) {
 	formData := url.Values{
+		"cheer_word": {cheerWord},
 		"address":    {address},
 		"code":       {code},
 		"love_power": {fmt.Sprintf("%d", lovePower)},
@@ -83,10 +84,10 @@ func randNumber() int64 {
 	return rand.Int63()
 }
 
-func rawOre(address string, code string) (string, int64) {
+func rawOre(cheerWord string, address string, code string) (string, int64) {
 	lovePower := randNumber()
 	unixTime := timestamp()
-	return fmt.Sprintf("%s%d%d%s", address, lovePower, unixTime, code), lovePower
+	return fmt.Sprintf("%s%s%d%d%s", cheerWord, address, lovePower, unixTime, code), lovePower
 }
 
 func hash(ore string) string {
@@ -107,12 +108,12 @@ func matchWish(hard int, bin string) bool {
 	return matched
 }
 
-func dig(address string, code string, hard *int, count *int, writeChannel chan int) {
+func dig(cheerWord string, address string, code string, hard *int, count *int, writeChannel chan int) {
 	for true {
-		ore, lovePower := rawOre(address, code)
+		ore, lovePower := rawOre(cheerWord, address, code)
 		bin := hash(ore)
 		if matchWish(*hard, bin) {
-			success, res := postWish(hard, address, code, lovePower)
+			success, res := postWish(hard, cheerWord, address, code, lovePower)
 			if success {
 				if res["type"].(string) == "coin" {
 					amount := res["amount"].(float64)
@@ -132,6 +133,7 @@ func dig(address string, code string, hard *int, count *int, writeChannel chan i
 }
 
 func main() {
+	cheerWord := flag.String("w", "", "应援词，神秘玄学")
 	address := flag.String("a", "", "钱包地址，请不要泄露")
 	code := flag.String("code", "", "股票代码")
 	concurrency := flag.Int("c", 0, "并发数,默认为1, 不建议超过CPU数")
@@ -169,6 +171,13 @@ func main() {
 		concurrency = &inputConcurrency
 	}
 
+	if *cheerWord == "" {
+		var inputCheerWord string
+		fmt.Println("你想对他/她说？")
+		fmt.Scanln(&inputCheerWord)
+		cheerWord = &inputCheerWord
+	}
+
 	// init hard
 	hard := checkStatus()
 	fmt.Printf("当前股票代码: %s\n", *code)
@@ -178,7 +187,7 @@ func main() {
 	count := 0
 	cost := 0
 	for i := 0; i < *concurrency; i++ {
-		go dig(*address, *code, &hard, &count, writeChannel)
+		go dig(*cheerWord, *address, *code, &hard, &count, writeChannel)
 	}
 
 	for true {
