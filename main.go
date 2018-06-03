@@ -35,7 +35,8 @@ func HandleCriticalError(err error) {
 func checkStatus() int {
 	resp, err := http.Get(checkURL)
 	if err != nil {
-		HandleCriticalError(err)
+		HandleError(err)
+		return 16
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
@@ -56,12 +57,14 @@ func postWish(hard *int, address string, code string, lovePower int64) (bool, ma
 	}
 	resp, err := http.PostForm(wishURL, formData)
 	if err != nil {
-		HandleCriticalError(err)
+		HandleError(err)
+		return false, map[string]interface{}{}
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	var res map[string]interface{}
 	if err := json.Unmarshal(body, &res); err == nil {
+		fmt.Println(res)
 		*hard = int(res["hard"].(float64))
 		success := res["success"].(bool)
 		return success, res
