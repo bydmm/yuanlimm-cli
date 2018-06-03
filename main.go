@@ -180,6 +180,7 @@ func main() {
 
 	for true {
 		time.Sleep(1 * time.Second)
+		hard = checkStatus()
 		cost++
 		fmt.Printf("当前难度%d，当前速度:%d次/秒，总计计算次数:%d\n", hard, count/cost, count)
 	}
