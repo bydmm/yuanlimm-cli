@@ -45,8 +45,8 @@ func checkStatus() int {
 		hard := int(status["hard"].(float64))
 		return hard
 	}
-	HandleCriticalError(err)
-	return 0
+	HandleError(err)
+	return 16
 }
 
 func postWish(hard *int, address string, code string, lovePower int64) (bool, map[string]interface{}) {
@@ -69,7 +69,7 @@ func postWish(hard *int, address string, code string, lovePower int64) (bool, ma
 		success := res["success"].(bool)
 		return success, res
 	}
-	HandleCriticalError(err)
+	HandleError(err)
 	return false, res
 }
 
