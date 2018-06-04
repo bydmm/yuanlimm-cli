@@ -103,25 +103,42 @@ func oldHash(ore string) string {
 }
 
 func matchWish(hard int, bin [64]byte) bool {
-	zero := (hard / 4)
+	zero := (hard / 8)
 	for index := 1; index <= zero; index++ {
 		if bin[len(bin)-index] != 0 {
 			return false
 		}
 	}
 
-	residual := (hard % 4)
+	residual := (hard % 8)
 
 	if residual > 0 {
-		last := bin[len(bin)-(hard/4)-1]
-		head := fmt.Sprintf("%b", last)
+		last := bin[len(bin)-(hard/8)-1]
+		head := fmt.Sprintf("%08b", last)
+
+		if len(head) < residual {
+			return false
+		}
 
 		headZero := ""
 		for index := 0; index < residual; index++ {
 			headZero += "0"
 		}
 
-		return head[len(head)-residual:] != headZero
+		// if head[len(head)-residual:] == headZero {
+		// 	nbin := ""
+		// 	for _, n := range bin {
+		// 		fmt.Printf("%08b ", n)
+		// 		nbin = fmt.Sprintf("%s%08b", nbin, n)
+		// 	}
+		// 	fmt.Println()
+		// 	fmt.Println(bin)
+		// 	fmt.Println(head)
+		// 	fmt.Println(last)
+		// 	fmt.Println(hard)
+		// }
+
+		return head[len(head)-residual:] == headZero
 	}
 	return true
 }
@@ -208,7 +225,8 @@ func main() {
 	}
 
 	for true {
-		time.Sleep(1 * time.Second)
+		rand.Seed(time.Now().UnixNano())
+		time.Sleep(1000 * time.Millisecond)
 		hard = checkStatus()
 		cost++
 		fmt.Printf("当前难度%d，当前速度:%d次/秒，总计计算次数:%d\n", hard, count/cost, count)
