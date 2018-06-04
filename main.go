@@ -89,7 +89,11 @@ func rawOre(cheerWord string, address string, code string) (string, int64) {
 	return fmt.Sprintf("%s%s%d%d%s", cheerWord, address, lovePower, unixTime, code), lovePower
 }
 
-func hash(ore string) string {
+func hash(ore string) [64]byte {
+	return sha512.Sum512([]byte(ore))
+}
+
+func oldHash(ore string) string {
 	hashWish := sha512.Sum512([]byte(ore))
 	bin := ""
 	for _, n := range hashWish {
@@ -98,23 +102,35 @@ func hash(ore string) string {
 	return bin
 }
 
-func matchWish(hard int, bin string) bool {
-	// 截取这个卡的最后几位
-	last := bin[len(bin)-hard:]
-	// 难度系数就是说，最后几位的开头要有几个0
-	// 由于这个hash应该是随机分布的，那么0越多自然越难
-	headZero := ""
-	for index := 0; index < hard; index++ {
-		headZero += "0"
+func matchWish(hard int, bin [64]byte) bool {
+	zero := (hard / 4)
+	for index := 1; index <= zero; index++ {
+		if bin[len(bin)-index] != 0 {
+			return false
+		}
 	}
-	return last == headZero
+
+	residual := (hard % 4)
+
+	if residual > 0 {
+		last := bin[len(bin)-(hard/4)-1]
+		head := fmt.Sprintf("%b", last)
+
+		headZero := ""
+		for index := 0; index < residual; index++ {
+			headZero += "0"
+		}
+
+		return head[len(head)-residual:] != headZero
+	}
+	return true
 }
 
 func dig(cheerWord string, address string, code string, hard *int, count *int, writeChannel chan int) {
 	for true {
 		ore, lovePower := rawOre(cheerWord, address, code)
-		bin := hash(ore)
-		if matchWish(*hard, bin) {
+		if matchWish(*hard, hash(ore)) {
+			// fmt.Println(oldHash(ore))
 			success, res := postWish(hard, cheerWord, address, code, lovePower)
 			if success {
 				if res["type"].(string) == "coin" {
@@ -128,7 +144,7 @@ func dig(cheerWord string, address string, code string, hard *int, count *int, w
 			}
 		}
 		writeChannel <- 1
-		*count++
+		*count = *count + 1
 		<-writeChannel
 	}
 }
