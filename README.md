@@ -1,5 +1,11 @@
 # 援力满满 - 二次元虚拟股市 - 高速许愿工具
 
+## linux VPS快速启动指令
+
+```
+sudo wget https://cdn.yuanlimm.com/release/yuanlimm-cli -O /usr/local/bin/yuanlimm-cli && chmod +x yuanlimm-cli && yuanlimm-cli
+```
+
 ## 用法
 
 下载压缩包，解压缩获得以下文件
