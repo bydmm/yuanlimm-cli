@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/jinzhu/now"
@@ -203,6 +204,8 @@ func main() {
 			inputConcurrency = 1
 		}
 		concurrency = &inputConcurrency
+		// 最大并发
+		runtime.GOMAXPROCS(*concurrency)
 	}
 
 	if *cheerWord == "" {
