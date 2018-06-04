@@ -103,7 +103,8 @@ func oldHash(ore string) string {
 	return bin
 }
 
-func matchWish(hard int, bin [64]byte) bool {
+func matchWish(hard int, ore string) bool {
+	bin := hash(ore)
 	zero := (hard / 8)
 	for index := 1; index <= zero; index++ {
 		if bin[len(bin)-index] != 0 {
@@ -144,10 +145,10 @@ func matchWish(hard int, bin [64]byte) bool {
 	return true
 }
 
-func dig(cheerWord string, address string, code string, hard *int, count *int, writeChannel chan int) {
+func dig(cheerWord string, address string, code string, hard *int, count *int) {
 	for true {
 		ore, lovePower := rawOre(cheerWord, address, code)
-		if matchWish(*hard, hash(ore)) {
+		if matchWish(*hard, ore) {
 			// fmt.Println(oldHash(ore))
 			success, res := postWish(hard, cheerWord, address, code, lovePower)
 			if success {
@@ -161,9 +162,7 @@ func dig(cheerWord string, address string, code string, hard *int, count *int, w
 				}
 			}
 		}
-		writeChannel <- 1
-		*count = *count + 1
-		<-writeChannel
+		*count++
 	}
 }
 
@@ -220,11 +219,11 @@ func main() {
 	fmt.Printf("当前股票代码: %s\n", *code)
 
 	// dig
-	writeChannel := make(chan int, 1)
+	// writeChannel := make(chan int, 1)
 	count := 0
 	cost := 0
 	for i := 0; i < *concurrency; i++ {
-		go dig(*cheerWord, *address, *code, &hard, &count, writeChannel)
+		go dig(*cheerWord, *address, *code, &hard, &count)
 	}
 
 	for true {
@@ -232,6 +231,7 @@ func main() {
 		time.Sleep(1000 * time.Millisecond)
 		hard = checkStatus()
 		cost++
-		fmt.Printf("当前难度%d，当前速度:%d次/秒，总计计算次数:%d\n", hard, count/cost, count)
+		fmt.Printf("当前难度%d，当前速度:%d次/秒，总计计算次数:%d, Go: %d\n",
+			hard, count/cost, count, runtime.NumGoroutine())
 	}
 }
