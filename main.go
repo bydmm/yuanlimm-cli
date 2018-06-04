@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"regexp"
 	"time"
 
 	"github.com/jinzhu/now"
@@ -100,12 +99,15 @@ func hash(ore string) string {
 }
 
 func matchWish(hard int, bin string) bool {
-	reg := fmt.Sprintf("0{%d}$", hard)
-	matched, err := regexp.MatchString(reg, bin)
-	if err != nil {
-		HandleError(err)
+	// 截取这个卡的最后几位
+	last := bin[len(bin)-hard:]
+	// 难度系数就是说，最后几位的开头要有几个0
+	// 由于这个hash应该是随机分布的，那么0越多自然越难
+	headZero := ""
+	for index := 0; index < hard; index++ {
+		headZero += "0"
 	}
-	return matched
+	return last == headZero
 }
 
 func dig(cheerWord string, address string, code string, hard *int, count *int, writeChannel chan int) {
@@ -173,7 +175,7 @@ func main() {
 
 	if *cheerWord == "" {
 		var inputCheerWord string
-		fmt.Println("你想对他/她说？")
+		fmt.Println("你想对他/她说?")
 		fmt.Scanln(&inputCheerWord)
 		cheerWord = &inputCheerWord
 	}
