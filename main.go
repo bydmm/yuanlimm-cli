@@ -125,7 +125,6 @@ func dig(cheerWord string, address string, code string, hard *int, count *int, w
 					amount := res["amount"].(float64)
 					fmt.Printf("获得股票：%1.0f\n", amount)
 				}
-				// println(res["hard"])
 			}
 		}
 		writeChannel <- 1
