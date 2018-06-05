@@ -2,9 +2,18 @@
 
 ## linux VPS快速启动指令
 
+```bash
+curl https://cdn.yuanlimm.com/release/yuanlimm-cli --output yuanlimm-cli \
+&& sudo chmod +x ./yuanlimm-cli \
+&& nohup ./yuanlimm-cli -a 钱包地址 --code 股票代码 -c 1 -w 英梨梨我喜欢你 &
 ```
-curl https://cdn.yuanlimm.com/release/yuanlimm-cli --output yuanlimm-cli && sudo chmod +x ./yuanlimm-cli && ./yuanlimm-cli
+
+## 检查上面的运行状态
+
+```bash
+tail -f nohup.out
 ```
+
 
 ## 用法
 
