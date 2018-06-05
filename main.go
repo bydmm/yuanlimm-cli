@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha512"
 	"encoding/json"
 	"flag"
@@ -11,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"runtime"
+	"strconv"
 	"time"
 
 	"github.com/jinzhu/now"
@@ -84,14 +86,20 @@ func randNumber() int64 {
 	return rand.Int63()
 }
 
-func rawOre(cheerWord string, address string, code string) (string, int64) {
+func rawOre(unixtime *int64, cheerWord string, address string, code string) ([]byte, int64) {
 	lovePower := randNumber()
-	unixTime := timestamp()
-	return fmt.Sprintf("%s%s%d%d%s", cheerWord, address, lovePower, unixTime, code), lovePower
+	ore := bytes.Join([][]byte{
+		[]byte(cheerWord),
+		[]byte(address),
+		[]byte(strconv.FormatInt(lovePower, 10)),
+		[]byte(strconv.FormatInt(*unixtime, 10)),
+		[]byte(code),
+	}, []byte{})
+	return ore, lovePower
 }
 
-func hash(ore string) [64]byte {
-	return sha512.Sum512([]byte(ore))
+func hash(ore []byte) [64]byte {
+	return sha512.Sum512(ore)
 }
 
 func oldHash(ore string) string {
@@ -103,7 +111,7 @@ func oldHash(ore string) string {
 	return bin
 }
 
-func matchWish(hard int, ore string) bool {
+func matchWish(hard int, ore []byte) bool {
 	bin := hash(ore)
 	zero := (hard / 8)
 	for index := 1; index <= zero; index++ {
@@ -145,9 +153,9 @@ func matchWish(hard int, ore string) bool {
 	return true
 }
 
-func dig(cheerWord string, address string, code string, hard *int, count *int) {
+func dig(unixtime *int64, cheerWord string, address string, code string, hard *int, count *int) {
 	for true {
-		ore, lovePower := rawOre(cheerWord, address, code)
+		ore, lovePower := rawOre(unixtime, cheerWord, address, code)
 		if matchWish(*hard, ore) {
 			// fmt.Println(oldHash(ore))
 			success, res := postWish(hard, cheerWord, address, code, lovePower)
@@ -222,14 +230,16 @@ func main() {
 	// writeChannel := make(chan int, 1)
 	count := 0
 	cost := 0
+	unixtime := timestamp()
 	for i := 0; i < *concurrency; i++ {
-		go dig(*cheerWord, *address, *code, &hard, &count)
+		go dig(&unixtime, *cheerWord, *address, *code, &hard, &count)
 	}
 
 	for true {
 		rand.Seed(time.Now().UnixNano())
 		time.Sleep(1000 * time.Millisecond)
 		hard = checkStatus()
+		unixtime = timestamp()
 		cost++
 		fmt.Printf("当前难度%d，当前速度:%d次/秒，总计计算次数:%d, Go: %d\n",
 			hard, count/cost, count, runtime.NumGoroutine())
