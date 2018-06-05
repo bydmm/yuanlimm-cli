@@ -41,11 +41,11 @@ yuanlimm-cli_win_x64.exe
 cli_linux_x64 -a example_address -c 3 -code ERIRI
 ```
 
--a: 钱包地址
+-a: 钱包地址, https://www.yuanlimm.com/#/profile
 
--c: 并发
+-c: 并发，建议和cpu数量相同
 
--code: 股票代码
+-code: 股票代码，比如英梨梨的地址：https://www.yuanlimm.com/#/stock/ERIRI，的股票代码是ERIRI，
 
 ## 支持
 
