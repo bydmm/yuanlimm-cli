@@ -3,7 +3,7 @@
 ## linux VPS快速启动指令
 
 ```
-wget https://cdn.yuanlimm.com/release/yuanlimm-cli && sudo chmod +x ./yuanlimm-cli && ./yuanlimm-cli
+curl https://cdn.yuanlimm.com/release/yuanlimm-cli --output yuanlimm-cli && sudo chmod +x ./yuanlimm-cli && ./yuanlimm-cli
 ```
 
 ## 用法
