@@ -34,21 +34,22 @@ func HandleCriticalError(err error) {
 	os.Exit(-1)
 }
 
-func checkStatus() int {
+func checkStatus() (int, int64) {
 	resp, err := http.Get(checkURL)
 	if err != nil {
 		HandleError(err)
-		return 16
+		return 0, 16
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	var status map[string]interface{}
 	if err := json.Unmarshal(body, &status); err == nil {
 		hard := int(status["hard"].(float64))
-		return hard
+		unixTime := int64(status["unix_time"].(float64))
+		return hard, unixTime
 	}
 	HandleError(err)
-	return 16
+	return 0, 16
 }
 
 func postWish(hard *int, cheerWord string, address string, code string, lovePower int64) (bool, map[string]interface{}) {
@@ -223,23 +224,21 @@ func main() {
 	}
 
 	// init hard
-	hard := checkStatus()
+	hard, unixTime := checkStatus()
 	fmt.Printf("当前股票代码: %s\n", *code)
 
 	// dig
 	// writeChannel := make(chan int, 1)
 	count := 0
 	cost := 0
-	unixtime := timestamp()
 	for i := 0; i < *concurrency; i++ {
-		go dig(&unixtime, *cheerWord, *address, *code, &hard, &count)
+		go dig(&unixTime, *cheerWord, *address, *code, &hard, &count)
 	}
 
 	for true {
 		rand.Seed(time.Now().UnixNano())
 		time.Sleep(1000 * time.Millisecond)
-		hard = checkStatus()
-		unixtime = timestamp()
+		hard, unixTime = checkStatus()
 		cost++
 		fmt.Printf("当前难度%d，当前速度:%d次/秒，总计计算次数:%d, Go: %d\n",
 			hard, count/cost, count, runtime.NumGoroutine())
