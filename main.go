@@ -179,7 +179,7 @@ func main() {
 	cheerWord := flag.String("w", "", "应援词，神秘玄学")
 	address := flag.String("a", "", "钱包地址，请不要泄露")
 	code := flag.String("code", "", "股票代码")
-	concurrency := flag.Int("c", 0, "并发数,默认为1, 不建议超过CPU数")
+	// concurrency := flag.Int("c", 0, "并发数,默认为1, 不建议超过CPU数")
 	flag.Parse()
 
 	if *address == "" {
@@ -204,17 +204,17 @@ func main() {
 		code = &inputCode
 	}
 
-	if *concurrency == 0 {
-		var inputConcurrency int
-		fmt.Println("并发数，建议与CPU核心相同，默认为1: ")
-		fmt.Scanln(&inputConcurrency)
-		if inputConcurrency == 0 {
-			inputConcurrency = 1
-		}
-		concurrency = &inputConcurrency
-		// 最大并发
-		runtime.GOMAXPROCS(*concurrency)
-	}
+	// if *concurrency == 0 {
+	// 	var inputConcurrency int
+	// 	fmt.Println("并发数，建议与CPU核心相同，默认为1: ")
+	// 	fmt.Scanln(&inputConcurrency)
+	// 	if inputConcurrency == 0 {
+	// 		inputConcurrency = 1
+	// 	}
+	// 	concurrency = &inputConcurrency
+	// 	// 最大并发
+	// 	runtime.GOMAXPROCS(*concurrency)
+	// }
 
 	if *cheerWord == "" {
 		var inputCheerWord string
@@ -231,16 +231,24 @@ func main() {
 	// writeChannel := make(chan int, 1)
 	count := 0
 	cost := 0
-	for i := 0; i < *concurrency; i++ {
-		go dig(&unixTime, *cheerWord, *address, *code, &hard, &count)
-	}
 
+	// for i := 0; i < *concurrency; i++ {
+	// 	go dig(&unixTime, *cheerWord, *address, *code, &hard, &count)
+	// }
+
+	oldTime := timestamp()
 	for true {
-		rand.Seed(time.Now().UnixNano())
-		time.Sleep(1000 * time.Millisecond)
-		hard, unixTime = checkStatus()
-		cost++
-		fmt.Printf("当前难度%d，当前速度:%d次/秒，总计计算次数:%d, Go: %d\n",
-			hard, count/cost, count, runtime.NumGoroutine())
+		newTime := timestamp()
+		if (newTime - oldTime) > 1000 {
+			oldTime = newTime
+			rand.Seed(time.Now().UnixNano())
+			// time.Sleep(1000 * time.Millisecond)
+			hard, unixTime = checkStatus()
+			cost++
+			fmt.Printf("当前难度%d，当前速度:%d次/秒，总计计算次数:%d, Go: %d\n",
+				hard, count/cost, count, runtime.NumGoroutine())
+		}
+		dig(&unixTime, *cheerWord, *address, *code, &hard, &count)
+
 	}
 }
