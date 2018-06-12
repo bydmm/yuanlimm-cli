@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"runtime"
 	"strconv"
 	"time"
 
@@ -155,24 +154,22 @@ func matchWish(hard int, ore []byte) bool {
 }
 
 func dig(unixtime *int64, cheerWord string, address string, code string, hard *int, count *int) {
-	for true {
-		ore, lovePower := rawOre(unixtime, cheerWord, address, code)
-		if matchWish(*hard, ore) {
-			// fmt.Println(oldHash(ore))
-			success, res := postWish(hard, cheerWord, address, code, lovePower)
-			if success {
-				if res["type"].(string) == "coin" {
-					amount := res["amount"].(float64)
-					fmt.Printf("获得援力：%0.2f\n", amount/100.0)
-				}
-				if res["type"].(string) == "stock" {
-					amount := res["amount"].(float64)
-					fmt.Printf("获得股票：%1.0f\n", amount)
-				}
+	ore, lovePower := rawOre(unixtime, cheerWord, address, code)
+	if matchWish(*hard, ore) {
+		// fmt.Println(oldHash(ore))
+		success, res := postWish(hard, cheerWord, address, code, lovePower)
+		if success {
+			if res["type"].(string) == "coin" {
+				amount := res["amount"].(float64)
+				fmt.Printf("获得援力：%0.2f\n", amount/100.0)
+			}
+			if res["type"].(string) == "stock" {
+				amount := res["amount"].(float64)
+				fmt.Printf("获得股票：%1.0f\n", amount)
 			}
 		}
-		*count++
 	}
+	*count++
 }
 
 func main() {
@@ -236,19 +233,16 @@ func main() {
 	// 	go dig(&unixTime, *cheerWord, *address, *code, &hard, &count)
 	// }
 
-	oldTime := timestamp()
+	oldTime := time.Now().Unix()
 	for true {
-		newTime := timestamp()
-		if (newTime - oldTime) > 1000 {
+		newTime := time.Now().Unix()
+		if (newTime - oldTime) > 1 {
 			oldTime = newTime
 			rand.Seed(time.Now().UnixNano())
-			// time.Sleep(1000 * time.Millisecond)
 			hard, unixTime = checkStatus()
 			cost++
-			fmt.Printf("当前难度%d，当前速度:%d次/秒，总计计算次数:%d, Go: %d\n",
-				hard, count/cost, count, runtime.NumGoroutine())
+			fmt.Printf("当前难度%d，当前速度:%d次/秒，总计计算次数:%d\n", hard, count/cost, count)
 		}
 		dig(&unixTime, *cheerWord, *address, *code, &hard, &count)
-
 	}
 }
