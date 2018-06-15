@@ -49,7 +49,7 @@ cli_linux_x64 -a example_address -c 3 -code ERIRI
 
 ## 开发白皮书
 
-[白皮书](/wite_paper.md)
+[白皮书](/white_paper.md)
 
 ## 支持
 
