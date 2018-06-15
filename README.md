@@ -47,6 +47,10 @@ cli_linux_x64 -a example_address -c 3 -code ERIRI
 
 -code: 股票代码，比如英梨梨的地址：https://www.yuanlimm.com/#/stock/ERIRI，的股票代码是ERIRI，
 
+## 开发白皮书
+
+[白皮书](/wite_paper.md)
+
 ## 支持
 
 QQ群：774800449
