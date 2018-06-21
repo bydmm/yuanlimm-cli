@@ -18,7 +18,7 @@ import (
 	"github.com/jinzhu/now"
 )
 
-const host string = "https://www.yuanlimm.com"
+const host string = "http://yuanlimm-server.yuanlimm.com"
 
 var wishURL = fmt.Sprintf("%s/api/super_wishs", host)
 var checkURL = fmt.Sprintf("%s/api/super_wishs", host)
