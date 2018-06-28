@@ -158,7 +158,7 @@ func dig(unixtime *int64, cheerWord string, address string, code string, hard *i
 	for true {
 		ore, lovePower := rawOre(unixtime, cheerWord, address, code)
 		if matchWish(*hard, ore) {
-			// fmt.Println(oldHash(ore))
+			rand.Seed(time.Now().UnixNano())
 			success, res := postWish(hard, cheerWord, address, code, lovePower)
 			if success {
 				if res["type"].(string) == "coin" {
@@ -236,7 +236,6 @@ func main() {
 	}
 
 	for true {
-		rand.Seed(time.Now().UnixNano())
 		time.Sleep(1000 * time.Millisecond)
 		hard, unixTime = checkStatus()
 		cost++
